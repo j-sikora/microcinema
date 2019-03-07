@@ -2,6 +2,7 @@ package com.microcinema.cinema;
 
 import com.microcinema.cinema.api.Performances;
 import com.microcinema.cinema.services.PerformanceService;
+import com.netflix.ribbon.proxy.annotation.Hystrix;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

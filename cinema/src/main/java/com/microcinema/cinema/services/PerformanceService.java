@@ -3,6 +3,8 @@ package com.microcinema.cinema.services;
 import com.microcinema.cinema.api.Movie;
 import com.microcinema.cinema.api.Performance;
 import com.microcinema.cinema.api.Performances;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.ribbon.proxy.annotation.Hystrix;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -66,24 +68,27 @@ public class PerformanceService {
         performance.setEndDate(calendar.getTime());
     }
 
+    @HystrixCommand(fallbackMethod = "getPerformanceFallback")
     public Performances getPerformances() {
         final Performances performances = new Performances();
         final Map<Long, Movie> movies = new HashMap<>();
         performanceMap.forEach((performanceId, performance) -> {
             Long movieId = performance.getMovieId();
             Movie movie;
-            if(!movies.containsKey(movieId)) {
-                movie = restTemplate.getForObject("http://movies/movie/" + movieId, Movie.class);
+            if (!movies.containsKey(movieId)) {
+                movie = restTemplate.getForObject("http://movies-service/movie/" + movieId, Movie.class);
                 performances.getMovies().add(movie);
                 movies.put(movieId, movie);
-            }
-            else {
+            } else {
                 movie = movies.get(movieId);
             }
             calculatePerformanceEnd(performance, movie.getMinutesLength());
             performances.addPerformance(performance);
         });
-        return  performances;
+        return performances;
     }
 
+    public Performances getPerformanceFallback() {
+        return new Performances(performanceMap.values());
+    }
 }
