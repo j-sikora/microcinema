@@ -28,7 +28,7 @@ public class ReportService {
         this.cinemaChannels = cinemaChannels;
     }
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 36000)
     public void startReport() {
         log.info("preparing report");
         Random random = new Random();
